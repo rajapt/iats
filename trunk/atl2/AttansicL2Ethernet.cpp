@@ -360,8 +360,11 @@ void AttansicL2Ethernet::at_intr_tx(at_adapter *adapter)
         
         atomic_set(&adapter->txd_read_ptr, (int)txd_read_ptr);
         
-
-    } while (1);
+        // tx statistics:
+        if (txs->ok)            netStats_->outputPackets++;
+        else                    netStats_->outputErrors++;
+        if (txs->defer)         netStats_->collisions++;
+	} while (1);
 
 
 }
@@ -402,7 +405,14 @@ void AttansicL2Ethernet::at_intr_rx(at_adapter *adapter)
 			netIface_->inputPacket(skb, rx_size, IONetworkInterface::kInputOptionQueuePacket);
 			netIface_->flushInputQueue();
 
-		} 
+			// rx statistics:
+			netStats_->inputPackets++;
+
+		} else { 
+            
+            netStats_->inputErrors++; 
+            
+        }
 		
 		// advance write ptr
 		if (++adapter->rxd_write_ptr == adapter->rxd_ring_size)
