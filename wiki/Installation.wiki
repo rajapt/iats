@@ -1,4 +1,3 @@
-
 = Introduction =
 
 This is the current installation document for Installation
@@ -9,7 +8,7 @@ This is the current installation document for Installation
 
 2) Unzip the driver.
 
-3) Install the driver with kexthelper Kexthelper Download ([http://web.mac.com/v1.42ghz/Kext_Helper/Software_files/Kext%20Helper%20b7.zip click])
+3) Download kexthelper Kexthelper ([http://web.mac.com/v1.42ghz/Kext_Helper/Software_files/Kext%20Helper%20b7.zip click]).
 
 4) Drop kext file on the Kexthelper application.
 
