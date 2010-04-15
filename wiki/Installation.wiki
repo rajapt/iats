@@ -1,3 +1,4 @@
+#labels Phase-Deploy,Featured
 = Introduction =
 
 This is the current installation document for Installation
