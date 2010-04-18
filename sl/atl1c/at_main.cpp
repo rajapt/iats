@@ -1234,18 +1234,37 @@ void atl1c_clear_phy_int(atl1c_adapter *adapter)
 {
 	struct atl1c_rfd_ring *rfd_ring = &adapter->rfd_ring[ringid];
 
-	struct atl1c_buffer *buffer_info, *next_info;
+	struct atl1c_buffer *buffer_info;//, *next_info;
 
 	u16 num_alloc = 0;
-	u16 rfd_next_to_use, next_next;
-	struct atl1c_rx_free_desc *rfd_desc;
-	
+//		u16 rfd_next_to_use, next_next;
+		struct atl1c_rx_free_desc *rfd_desc;
+/*	
 	next_next = rfd_next_to_use = rfd_ring->next_to_use;
 	if (++next_next == rfd_ring->count)
 		next_next = 0;
 	buffer_info = &rfd_ring->buffer_info[rfd_next_to_use];
 	next_info = &rfd_ring->buffer_info[next_next];
-	
+*/	
+	for (u32 index = 0; index < rfd_ring->count; index++) {
+		buffer_info = &rfd_ring->buffer_info[index];
+		rfd_desc = ATL1C_RFD_DESC(rfd_ring, index); 
+		buffer_info->memDesc = IOBufferMemoryDescriptor::withOptions(0,adapter->rx_buffer_len);
+		if (!buffer_info->memDesc || buffer_info->memDesc->prepare() != kIOReturnSuccess)
+		{
+			ErrPrint("alloc rx buffer failed\n");
+			return -ENOMEM;
+		}
+
+		IOByteCount length;
+		buffer_info->dma = buffer_info->memDesc->getPhysicalSegment(0, &length);
+		buffer_info->state = ATL1_BUFFER_BUSY;
+		buffer_info->length = adapter->rx_buffer_len;
+		
+		rfd_desc->buffer_addr = OSSwapHostToLittleInt64(buffer_info->dma);
+		num_alloc++;
+	}
+/*
 	while (next_info->state == ATL1_BUFFER_FREE) {
 		rfd_desc = ATL1C_RFD_DESC(rfd_ring, rfd_next_to_use);
 		
@@ -1256,11 +1275,7 @@ void atl1c_clear_phy_int(atl1c_adapter *adapter)
 			return -ENOMEM;
 		}
 		
-		/*
-		 * Make buffer alignment 2 beyond a 16 byte boundary
-		 * this will result in a 16 byte aligned IP header after
-		 * the 14 byte MAC header is removed
-		 */
+
 		IOByteCount length;
 		buffer_info->dma = buffer_info->memDesc->getPhysicalSegment(0, &length);
 		//skb_reserve(skb, NET_IP_ALIGN);
@@ -1275,15 +1290,17 @@ void atl1c_clear_phy_int(atl1c_adapter *adapter)
 		next_info = &rfd_ring->buffer_info[next_next];
 		num_alloc++;
 	}
-	
-	if (num_alloc) {
-		/* TODO: update mailbox here */
+*/
+/*	if (num_alloc) {
+		// TODO: update mailbox here 
 		rfd_ring->next_to_use = rfd_next_to_use;
 		AT_WRITE_REG(&adapter->hw, atl1c_rfd_prod_idx_regs[ringid],
 					 rfd_ring->next_to_use & MB_RFDX_PROD_IDX_MASK);
 	}
+*/
 	DbgPrint("Total allocated space for rx descriptors D%d; num_alloc= D%d; adapter->rx_buffer_len= D%d\n",
 			 num_alloc * adapter->rx_buffer_len,num_alloc , adapter->rx_buffer_len);
+	
 	return num_alloc? 0 : -1 ;
 }
 
