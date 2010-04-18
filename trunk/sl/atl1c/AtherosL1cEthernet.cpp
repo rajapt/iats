@@ -1002,7 +1002,7 @@ void AtherosL1cEthernet::atSwFree()
 {
 	DbgPrint("atSwFree()\n");
 	
-	if (adapter_.mdio_lock)
+/*	if (adapter_.mdio_lock)
 	{
 		IOSimpleLockFree(adapter_.mdio_lock);
 		adapter_.mdio_lock = NULL;
@@ -1012,7 +1012,8 @@ void AtherosL1cEthernet::atSwFree()
 	{
 		IOSimpleLockFree(adapter_.tx_lock);
 		adapter_.tx_lock = NULL;
-	}
+	}*/
+	
 }
 
 #pragma mark -

@@ -197,9 +197,9 @@ static void atl1c_phy_config(unsigned long data)
 	atl1c_adapter *adapter = (atl1c_adapter *) data;
 	atl1c_hw *hw = &adapter->hw;
 	
-	IOSimpleLockLock(adapter->mdio_lock);
+	//IOSimpleLockLock(adapter->mdio_lock);
 	atl1c_restart_autoneg(hw);
-	IOSimpleLockFree(adapter->mdio_lock);
+	//IOSimpleLockFree(adapter->mdio_lock);
 }
 
 
@@ -339,8 +339,8 @@ int  atl1c_sw_init(atl1c_adapter *adapter)
 	/* TODO */
 	atl1c_set_rxbufsize(adapter);
 	atomic_set(&adapter->irq_sem, 1);
-	adapter->mdio_lock = IOSimpleLockAlloc();
-	adapter->tx_lock = IOSimpleLockAlloc();
+	//adapter->mdio_lock = IOSimpleLockAlloc();
+	//adapter->tx_lock = IOSimpleLockAlloc();
 	
 	return 0;
 }
@@ -1218,9 +1218,9 @@ void atl1c_clear_phy_int(atl1c_adapter *adapter)
 {
 	u16 phy_data;
 	
-	IOSimpleLockLock(adapter->mdio_lock);
+	//IOSimpleLockLock(adapter->mdio_lock);
 	atl1c_read_phy_reg(&adapter->hw, MII_ISR, &phy_data);
-	IOSimpleLockLock(adapter->mdio_lock);
+	//IOSimpleLockLock(adapter->mdio_lock);
 }
 
 
