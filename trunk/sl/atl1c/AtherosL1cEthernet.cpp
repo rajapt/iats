@@ -423,8 +423,8 @@ void AtherosL1cEthernet::atl1c_clean_rx_irq(struct atl1c_adapter *adapter, u8 qu
 		count++;
 		
 	}
-	if (count)
-		atl1c_alloc_rx_buffer(adapter, que);
+	//if (count)
+	//	atl1c_alloc_rx_buffer(adapter, que);
 
 }
 
