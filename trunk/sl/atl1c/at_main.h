@@ -33,7 +33,6 @@ void atl1c_clean_rfd(atl1c_rfd_ring *rfd_ring, atl1c_recv_ret_status *rrs, u16 n
 int atl1c_alloc_rx_buffer(atl1c_adapter *adapter, const int ringid);
 void atl1c_init_ring_ptrs(atl1c_adapter *adapter);
 int atl1c_configure(atl1c_adapter *adapter);
-int atl1c_request_irq(atl1c_adapter *adapter);
 void atl1c_irq_enable(atl1c_adapter *adapter);
 void atl1c_irq_disable(atl1c_adapter *adapter);
 int atl1c_reset_mac(atl1c_hw *hw);
@@ -43,7 +42,7 @@ void atl1c_clean_tx_ring(atl1c_adapter *adapter,atl1c_trans_queue type);
 void atl1c_clean_rx_ring(atl1c_adapter *adapter);
 void atl1c_setup_mac_ctrl(atl1c_adapter *adapter);
 int  atl1c_sw_init(atl1c_adapter *adapter);
-void atl1c_reset_pcie(atl1c_hw *hw, u32 flag);
+void atl1c_reset_pcie(IOPCIDevice *pdev,atl1c_hw *hw, u32 flag);
 
 atl1c_tpd_desc *atl1c_get_tpd(atl1c_adapter *adapter,atl1c_trans_queue type);
 atl1c_buffer *atl1c_get_tx_buffer(atl1c_adapter *adapter, atl1c_tpd_desc *tpd);

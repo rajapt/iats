@@ -465,11 +465,6 @@ IOReturn AtherosL1cEthernet::enable(IONetworkInterface *netif)
 		DbgPrint( "failed to atl1c_configure.\n");
 		return kIOReturnError;
 	}
-	err = atl1c_request_irq(adapter);
-	if (err){
-		DbgPrint( "atl1c_request_irq.\n");
-		return kIOReturnError;;
-	}
 
 	//PHY medium selection
 	const IONetworkMedium *medium = getSelectedMedium();
@@ -976,7 +971,7 @@ bool AtherosL1cEthernet::atProbe()
 	/* FIXME: not sure if should exist,
 	 * pci_enable_device have already do this
 	 */
-	atl1c_reset_pcie(&adapter->hw, ATL1C_PCIE_L0S_L1_DISABLE |
+	atl1c_reset_pcie(pdev,&adapter->hw, ATL1C_PCIE_L0S_L1_DISABLE |
 					 ATL1C_PCIE_PHY_RESET);
 	
 	
