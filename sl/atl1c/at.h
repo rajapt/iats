@@ -609,8 +609,8 @@ struct atl1c_adapter {
 	u16 link_speed;
 	u16 link_duplex;
 	
-	spinlock_t mdio_lock;
-	spinlock_t tx_lock;
+	//spinlock_t mdio_lock;
+	//spinlock_t tx_lock;
 	atomic_t irq_sem;
 	
 	/* All Descriptor memory */
