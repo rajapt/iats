@@ -380,7 +380,8 @@ s32 atl1c_alloc_tx_buffers(atl1c_adapter *adapter,
 		
 		num_alloc++;
 	}
-	DbgPrint("Total allocated space for tx descriptors %d\n", num_alloc * MAX_TX_BUF_LEN);
+	DbgPrint("Total allocated space for tx descriptors D%d; num_alloc= D%d; buffer_len= D%d\n",
+			 num_alloc * MAX_TX_BUF_LEN,num_alloc , MAX_TX_BUF_LEN);
 	
 	return 0;
 }
@@ -557,7 +558,9 @@ void atl1c_free_ring_resources(struct atl1c_adapter *adapter)
         return -ENOMEM;
     }
     memset(tpd_ring->buffer_info, 0, size);
-	
+	DbgPrint("Allocated memory for descriptor tpd ring, all size = D%d; tpd_ring->count * 2 = D%d; rfd_ring->count * num_rx_queues= D%d \n",
+			 size,tpd_ring->count * 2,rfd_ring->count * num_rx_queues);
+
 	for (i = 0; i < AT_MAX_TRANSMIT_QUEUE; i++) {
 		tpd_ring[i].buffer_info =
 		(struct atl1c_buffer *) (tpd_ring->buffer_info + count);
@@ -598,6 +601,8 @@ void atl1c_free_ring_resources(struct atl1c_adapter *adapter)
 		DbgPrint("Couldn't alloc memory for descriptor ring header, size = D%d\n", ring_header->size);
         return -ENOMEM;
 	}
+	DbgPrint("Allocated memory for descriptor ring, size = D%d ; page_size = D%d\n", ring_header->size, PAGE_SIZE);
+
 	IOByteCount dmaLength = 0;
 	ring_header->dma = ring_header->memDesc->getPhysicalSegment(0, &dmaLength);
 	ring_header->desc = ring_header->memDesc->getBytesNoCopy();
@@ -1277,8 +1282,9 @@ void atl1c_clear_phy_int(atl1c_adapter *adapter)
 		AT_WRITE_REG(&adapter->hw, atl1c_rfd_prod_idx_regs[ringid],
 					 rfd_ring->next_to_use & MB_RFDX_PROD_IDX_MASK);
 	}
-	DbgPrint("Total allocated space for rx descriptors %d\n", num_alloc * adapter->rx_buffer_len);
-	return 0;
+	DbgPrint("Total allocated space for rx descriptors D%d; num_alloc= D%d; adapter->rx_buffer_len= D%d\n",
+			 num_alloc * adapter->rx_buffer_len,num_alloc , adapter->rx_buffer_len);
+	return num_alloc? 0 : -1 ;
 }
 
 void atl1c_clean_rrd(struct atl1c_rrd_ring *rrd_ring,

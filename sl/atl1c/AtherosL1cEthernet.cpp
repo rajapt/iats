@@ -257,6 +257,8 @@ void AtherosL1cEthernet::atIntr(OSObject *client, IOInterruptEventSource *src, i
 		if (status == 0) {
 			break;
 		}
+		DEBUGOUT("atIntr() status = 0x%x!\n", (unsigned int)status);
+		
 		/* link event */
 		if (status & ISR_GPHY)
 			atl1c_clear_phy_int(adapter);
@@ -356,6 +358,9 @@ void AtherosL1cEthernet::atl1c_clean_rx_irq(struct atl1c_adapter *adapter, u8 qu
 
 	atl1c_recv_ret_status *rrs;
 	atl1c_buffer *buffer_info;
+	
+	DbgPrint("atl1c_clean_rx_irq()  que=%d, rrd_ring->next_to_clean=%d\n",
+              que, rrd_ring->next_to_clean);
 	
 	while (1) {
 
