@@ -473,7 +473,7 @@ void atl1c_init_ring_ptrs(atl1c_adapter *adapter)
 		atomic_set(&tpd_ring[i].next_to_clean, 0);
 		buffer_info = tpd_ring[i].buffer_info;
 		for (j = 0; j < tpd_ring->count; j++)
-			buffer_info[i].state = ATL1_BUFFER_FREE;
+			buffer_info[j].state = ATL1_BUFFER_FREE;
 	}
 	for (i = 0; i < adapter->num_rx_queues; i++) {
 		rfd_ring[i].next_to_use = 0;

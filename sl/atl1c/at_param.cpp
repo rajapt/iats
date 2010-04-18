@@ -86,7 +86,7 @@ void atl1c_check_options(atl1c_adapter *adapter)
 
     { /* Receive Memory Block Count */
         def  = ATL1C_DEFAULT_RX_MEM_SIZE;
-        adapter->rfd_ring[0].count = (u32)def * 1024;
+        adapter->rfd_ring[0].count = (u32)def;
     }
     
     { /* Interrupt Moderate Timer  */
