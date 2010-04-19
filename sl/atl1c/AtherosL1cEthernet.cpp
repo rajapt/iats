@@ -491,7 +491,7 @@ IOReturn AtherosL1cEthernet::enable(IONetworkInterface *netif)
 	
 	// Enable interrupts. 
 	atl1c_irq_enable(adapter);
-	atGetAndUpdateLinkStatus();
+	//atGetAndUpdateLinkStatus();
 	
 	// set FPGA vesion
 	if (adapter->hw.ctrl_flags & ATL1C_FPGA_VERSION) {
@@ -1028,7 +1028,10 @@ void AtherosL1cEthernet::atSwFree()
 void AtherosL1cEthernet::atGetAndUpdateLinkStatus()
 {
     DbgPrint("atGetAndUpdateLinkStatus()\n");
-    
+	
+    atl1c_adapter *adapter = &adapter_;
+	atl1c_hw *hw = &adapter->hw;
+	
 	UInt16 speed, duplex;
 	UInt32 currentMediumIndex = MEDIUM_INDEX_AUTO;
 
@@ -1046,13 +1049,21 @@ void AtherosL1cEthernet::atGetAndUpdateLinkStatus()
 
 		setLinkStatus(kIONetworkLinkActive | kIONetworkLinkValid, mediumTable[currentMediumIndex], speed * MBit, NULL);
 
-		adapter_.link_speed = speed;
-		adapter_.link_duplex = duplex;
+		adapter->link_speed  = speed;
+		adapter->link_duplex = duplex;
 
-		atl1c_setup_mac_ctrl(&adapter_);
+		atl1c_set_aspm(hw, true);
+		atl1c_enable_tx_ctrl(hw);
+		atl1c_enable_rx_ctrl(hw);
+		atl1c_setup_mac_ctrl(adapter);
 	} else
 	{
 		DbgPrint("Link is down\n");
+		if (atl1c_stop_mac(hw) != 0)
+			DbgPrint("stop mac failed\n");
+		atl1c_set_aspm(hw, false);
+		atl1c_phy_reset(hw);
+		atl1c_phy_init(hw);
 		setLinkStatus(kIONetworkLinkValid, NULL, 0, NULL);
 	}
 }
