@@ -44,6 +44,11 @@ void atl1c_setup_mac_ctrl(atl1c_adapter *adapter);
 int  atl1c_sw_init(atl1c_adapter *adapter);
 void atl1c_reset_pcie(IOPCIDevice *pdev,atl1c_hw *hw, u32 flag);
 
+int atl1c_stop_mac(atl1c_hw *hw);
+void atl1c_set_aspm(atl1c_hw *hw, bool linkup);
+void atl1c_enable_tx_ctrl(atl1c_hw *hw);
+void atl1c_enable_rx_ctrl(atl1c_hw *hw);
+
 atl1c_tpd_desc *atl1c_get_tpd(atl1c_adapter *adapter,atl1c_trans_queue type);
 atl1c_buffer *atl1c_get_tx_buffer(atl1c_adapter *adapter, atl1c_tpd_desc *tpd);
 u16 atl1c_tpd_avail(atl1c_adapter *adapter, atl1c_trans_queue type);
