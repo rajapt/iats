@@ -377,7 +377,7 @@ s32 atl1c_alloc_tx_buffers(atl1c_adapter *adapter,
 		buffer_info->state = ATL1_BUFFER_BUSY;
 		buffer_info->length = length;
 		tpd_desc->buffer_addr = OSSwapHostToLittleInt64(buffer_info->dma);
-		
+		tpd_desc->buffer_len  = OSSwapHostToLittleInt64(buffer_info->length);
 		num_alloc++;
 	}
 	DbgPrint("Total allocated space for tx descriptors D%d; num_alloc= D%d; buffer_len= D%d\n",
@@ -401,8 +401,8 @@ void atl1c_clean_tx_ring(struct atl1c_adapter *adapter,
 	ring_count = tpd_ring->count;
 	for (index = 0; index < ring_count; index++) {
 		buffer_info = &tpd_ring->buffer_info[index];
-		if (buffer_info->state == ATL1_BUFFER_FREE)
-			continue;
+		//if (buffer_info->state == ATL1_BUFFER_FREE)
+		//	continue;
 		if (buffer_info->dma) {
 			buffer_info->dma = 0;
 		}
@@ -436,8 +436,8 @@ void atl1c_clean_rx_ring(atl1c_adapter *adapter)
 	for (i = 0; i < adapter->num_rx_queues; i++) {
 		for (j = 0; j < rfd_ring[i].count; j++) {
 			buffer_info = &rfd_ring[i].buffer_info[j];
-			if (buffer_info->state == ATL1_BUFFER_FREE)
-				continue;
+			//if (buffer_info->state == ATL1_BUFFER_FREE)
+			//	continue;
 			if (buffer_info->dma) {
 				buffer_info->dma = 0;
 			}
@@ -601,12 +601,16 @@ void atl1c_free_ring_resources(struct atl1c_adapter *adapter)
 		DbgPrint("Couldn't alloc memory for descriptor ring header, size = D%d\n", ring_header->size);
         return -ENOMEM;
 	}
-	DbgPrint("Allocated memory for descriptor ring, size = D%d ; page_size = D%d\n", ring_header->size, PAGE_SIZE);
+	DbgPrint("Allocated memory for descriptor ring header, size = D%d ; page_size = D%d\n", ring_header->size, PAGE_SIZE);
 
 	IOByteCount dmaLength = 0;
 	ring_header->dma = ring_header->memDesc->getPhysicalSegment(0, &dmaLength);
 	ring_header->desc = ring_header->memDesc->getBytesNoCopy();
 	memset(ring_header->desc, 0, ring_header->size);
+	DbgPrint("ringheader , dma = 0x%lx ; desc = 0x%lx\n", 
+			 (long unsigned int)(ring_header->memDesc->getPhysicalSegment(0, &dmaLength)), 
+			 (long unsigned int)(ring_header->memDesc->getBytesNoCopy()));
+	
 	/* init TPD ring */
 	
 	tpd_ring[0].dma = roundup(ring_header->dma, 8);
