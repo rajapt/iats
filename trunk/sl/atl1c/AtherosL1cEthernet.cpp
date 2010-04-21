@@ -244,7 +244,7 @@ void AtherosL1cEthernet::atIntr(OSObject *client, IOInterruptEventSource *src, i
 	
 	atl1c_adapter *adapter = &adapter_;
     atl1c_hw *hw = &adapter->hw;
-	int max_ints = AT_MAX_INT_WORK;
+	s32 max_ints = AT_MAX_INT_WORK;
 
 	u32 status;
 	u32 reg_data;
@@ -257,7 +257,7 @@ void AtherosL1cEthernet::atIntr(OSObject *client, IOInterruptEventSource *src, i
 		if (status == 0) {
 			break;
 		}
-		DEBUGOUT("atIntr() status = 0x%x!\n", (unsigned int)status);
+		DEBUGOUT("atIntr() status = 0x%x!\n", status);
 		
 		/* link event */
 		if (status & ISR_GPHY)
@@ -324,7 +324,7 @@ bool AtherosL1cEthernet::atl1c_clean_tx_irq(atl1c_adapter *adapter,atl1c_trans_q
 	AT_READ_REG(&adapter->hw, REG_MB_PRIO_CONS_IDX, &data);
 	hw_next_to_clean = (data >> shift) & MB_PRIO_PROD_IDX_MASK; 
 	
-	DEBUGOUT1("atl1c_clean_tx_irq() hw_next_to_clean=%d, next_to_clean=%d\n",
+	DEBUGOUT("atl1c_clean_tx_irq() hw_next_to_clean=%d, next_to_clean=%d\n",
 			  hw_next_to_clean, next_to_clean);
 	
 	while (next_to_clean != hw_next_to_clean) {
@@ -379,7 +379,7 @@ void AtherosL1cEthernet::atl1c_clean_rx_irq(struct atl1c_adapter *adapter, u8 qu
 		atl1c_clean_rrd(rrd_ring, rrs, rfd_num);
 		if (rrs->word3 & (RRS_RX_ERR_SUM | RRS_802_3_LEN_ERR)) {
 			atl1c_clean_rfd(rfd_ring, rrs, rfd_num);
-			DEBUGOUT("wrong packet! rrs word3 is %x\n", (unsigned int)(rrs->word3));
+			DEBUGOUT("wrong packet! rrs word3 is %x\n", rrs->word3);
 			continue;
 		}
 		
@@ -397,7 +397,7 @@ void AtherosL1cEthernet::atl1c_clean_rx_irq(struct atl1c_adapter *adapter, u8 qu
 				DbgPrint("Memory squeeze, deferring packet.\n");
 				break;
 			}
-			DEBUGOUT1("pktsize=%d\n", (int)packet_size);
+			DEBUGOUT("pktsize=%d\n", packet_size);
 			
 			// copy packet to user buffer
 			if (buffer_info->memDesc)
@@ -437,8 +437,8 @@ IOReturn AtherosL1cEthernet::enable(IONetworkInterface *netif)
 {
 	DbgPrint("enable()\n");
 	
-	int err;
-	int i;
+	u32 err;
+	u32 i;
 
 	atl1c_adapter *adapter=&adapter_;
 	
@@ -690,7 +690,7 @@ UInt32 AtherosL1cEthernet::outputPacket(mbuf_t m, void *prm)
 {
 	DbgPrint("outputPacket()\n");
 	
-	UInt32 buf_len;
+	u32 buf_len;
 	atl1c_adapter *adapter=&adapter_;
 	
 	atl1c_tpd_desc *use_tpd;
@@ -725,10 +725,10 @@ UInt32 AtherosL1cEthernet::outputPacket(mbuf_t m, void *prm)
 		return kIOReturnOutputDropped;
 	}
 	 
-	DbgPrint("outputPacket() length %d next_to_use %d\n", (int)buf_len, (int)tpd_ring->next_to_use);
+	DbgPrint("outputPacket() length %d next_to_use %d\n", buf_len, tpd_ring->next_to_use);
 	
-	UInt8 *data_ptr = (UInt8 *)buffer_info->memDesc->getBytesNoCopy();
-	UInt32 pkt_snd_len = 0;
+	u8 *data_ptr = (u8 *)buffer_info->memDesc->getBytesNoCopy();
+	u32 pkt_snd_len = 0;
 	mbuf_t cur_buf = m;
 	do
 	{
@@ -900,7 +900,7 @@ IOReturn AtherosL1cEthernet::setMulticastList(IOEthernetAddress *addrs, UInt32 c
 
 int AtherosL1cEthernet::mdio_read(int phy_id, int reg_num)
 {
-	UInt16 result;
+	u16 result;
 	atl1c_read_phy_reg(&adapter_.hw, reg_num & MDIO_REG_ADDR_MASK, &result);
 
 	return result;
@@ -926,9 +926,9 @@ bool AtherosL1cEthernet::atProbe()
 {	
 	DbgPrint("atProbe()\n");
 	
-	UInt16	vendorId, deviceId;
+	u16	vendorId, deviceId;
     atl1c_adapter *adapter=&adapter_;
-	int err = 0;
+	s32 err = 0;
 	
 	IOPCIDevice	*pdev = adapter_.pdev;
 	pdev->setBusMasterEnable(true);
@@ -938,7 +938,7 @@ bool AtherosL1cEthernet::atProbe()
 	deviceId = pdev->configRead16(kIOPCIConfigDeviceID);
 
 	DbgPrint("Vendor ID %x, device ID %x\n", vendorId, deviceId);
-	DbgPrint("MMR0 address %x\n", (unsigned int)(pdev->configRead32(kIOPCIConfigBaseAddress0)));
+	DbgPrint("MMR0 address %x\n", (u32)pdev->configRead32(kIOPCIConfigBaseAddress0));
 
 	pdev->enablePCIPowerManagement();
 
@@ -950,8 +950,8 @@ bool AtherosL1cEthernet::atProbe()
 	}
 	else
 	{
-		DbgPrint("Memory mapped at bus address %x, virtual address %x, length %d\n", (unsigned int)hw_addr_->getPhysicalAddress(),
-					(unsigned int)hw_addr_->getVirtualAddress(), (int)hw_addr_->getLength());
+		DbgPrint("Memory mapped at bus address %x, virtual address %x, length %d\n", (u32)hw_addr_->getPhysicalAddress(),
+					(u32)hw_addr_->getVirtualAddress(), (s32)hw_addr_->getLength());
 	}
 	
 	hw_addr_->retain();
@@ -1032,8 +1032,8 @@ void AtherosL1cEthernet::atGetAndUpdateLinkStatus()
     atl1c_adapter *adapter = &adapter_;
 	atl1c_hw *hw = &adapter->hw;
 	
-	UInt16 speed, duplex;
-	UInt32 currentMediumIndex = MEDIUM_INDEX_AUTO;
+	u16 speed, duplex;
+	u32 currentMediumIndex = MEDIUM_INDEX_AUTO;
 
 	if(atl1c_get_speed_and_duplex(&adapter_.hw, &speed, &duplex) == 0)
 	{
@@ -1074,11 +1074,11 @@ void AtherosL1cEthernet::atGetAndUpdateLinkStatus()
  * Assumes the hardware has previously been reset and the
  * transmitter and receiver are not enabled.
  */
-SInt32 AtherosL1cEthernet::atSetupLink()
+s32 AtherosL1cEthernet::atSetupLink()
 {
 	DbgPrint("atSetupLink()\n");
 	
-	SInt32 ret_val;
+	s32 ret_val;
 
 	/*
 	 * Options:
