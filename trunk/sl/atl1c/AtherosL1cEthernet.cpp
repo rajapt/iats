@@ -97,19 +97,6 @@ bool AtherosL1cEthernet::start(IOService *provider)
 	adapter->pdev->retain();
 	adapter->pdev->open(this);
 
-	//Adding Mac OS X PHY's
-	mediumDict = OSDictionary::withCapacity(MEDIUM_INDEX_COUNT + 1);
-
-	OSAddNetworkMedium(kIOMediumEthernetAuto, 0, MEDIUM_INDEX_AUTO);
-	OSAddNetworkMedium(kIOMediumEthernet10BaseT | kIOMediumOptionHalfDuplex, 10 * MBit, MEDIUM_INDEX_10HD);
-	OSAddNetworkMedium(kIOMediumEthernet10BaseT | kIOMediumOptionFullDuplex, 10 * MBit, MEDIUM_INDEX_10FD);
-	OSAddNetworkMedium(kIOMediumEthernet100BaseTX | kIOMediumOptionHalfDuplex, 100 * MBit, MEDIUM_INDEX_100HD);
-	OSAddNetworkMedium(kIOMediumEthernet100BaseTX | kIOMediumOptionFullDuplex, 100 * MBit, MEDIUM_INDEX_100FD);
-	OSAddNetworkMedium(kIOMediumEthernet1000BaseTX | kIOMediumOptionHalfDuplex, 1000 * MBit, MEDIUM_INDEX_1000HD);
-	OSAddNetworkMedium(kIOMediumEthernet1000BaseTX | kIOMediumOptionFullDuplex, 1000 * MBit, MEDIUM_INDEX_1000FD);
-	
-	if (!publishMediumDictionary(mediumDict)) return false;
-
 	if (!atProbe())	//Fix false reporting int probe function
 	{
 		ErrPrint("Couldn't probe adapter\n");
@@ -117,6 +104,25 @@ bool AtherosL1cEthernet::start(IOService *provider)
 		return false;
 	}
 	
+	//Adding Mac OS X PHY's
+	if (atGetNicType() == TYPE_GIGABIT){
+		mediumDict = OSDictionary::withCapacity(MEDIUM_INDEX_COUNT_GIGABIT + 1);
+		OSAddNetworkMedium(kIOMediumEthernetAuto, 0, MEDIUM_INDEX_AUTO_GIGABIT);
+	}else{ //TYPE_FAST
+		mediumDict = OSDictionary::withCapacity(MEDIUM_INDEX_COUNT_FAST + 1);
+		OSAddNetworkMedium(kIOMediumEthernetAuto, 0, MEDIUM_INDEX_AUTO_FAST);
+	}
+	OSAddNetworkMedium(kIOMediumEthernet10BaseT | kIOMediumOptionHalfDuplex, 10 * MBit, MEDIUM_INDEX_10HD);
+	OSAddNetworkMedium(kIOMediumEthernet10BaseT | kIOMediumOptionFullDuplex, 10 * MBit, MEDIUM_INDEX_10FD);
+	OSAddNetworkMedium(kIOMediumEthernet100BaseTX | kIOMediumOptionHalfDuplex, 100 * MBit, MEDIUM_INDEX_100HD);
+	OSAddNetworkMedium(kIOMediumEthernet100BaseTX | kIOMediumOptionFullDuplex, 100 * MBit, MEDIUM_INDEX_100FD);
+	if (atGetNicType() == TYPE_GIGABIT){
+		OSAddNetworkMedium(kIOMediumEthernet1000BaseTX | kIOMediumOptionHalfDuplex, 1000 * MBit, MEDIUM_INDEX_1000HD);
+		OSAddNetworkMedium(kIOMediumEthernet1000BaseTX | kIOMediumOptionFullDuplex, 1000 * MBit, MEDIUM_INDEX_1000FD);
+	}
+	if (!publishMediumDictionary(mediumDict)) return false;
+
+
 
 	workLoop_ = getWorkLoop();
 	if (!workLoop_)
@@ -331,7 +337,7 @@ bool AtherosL1cEthernet::atl1c_clean_tx_irq(atl1c_adapter *adapter,atl1c_trans_q
 		buffer_info = &tpd_ring->buffer_info[next_to_clean];
 		if (buffer_info->state == ATL1_BUFFER_BUSY) {
 			// TO-DO clean
-			buffer_info->dma = 0;
+			//buffer_info->dma = 0;
 			buffer_info->state = ATL1_BUFFER_FREE;
 		}
 		if (++next_to_clean == tpd_ring->count)
@@ -476,7 +482,12 @@ IOReturn AtherosL1cEthernet::enable(IONetworkInterface *netif)
 	if (!medium)
 	{
 		DbgPrint("Selected medium is NULL, forcing to autonegotiation\n");
-		medium = mediumTable[MEDIUM_INDEX_AUTO];
+		
+		if (atGetNicType() == TYPE_GIGABIT){
+			medium = mediumTable[MEDIUM_INDEX_AUTO_GIGABIT];
+		}else{ //TYPE_FAST
+			medium = mediumTable[MEDIUM_INDEX_AUTO_FAST];
+		}
 	}
 	else
 	{
@@ -573,51 +584,88 @@ IOReturn AtherosL1cEthernet::selectMedium(const IONetworkMedium *medium)
 
 	if (medium)
 	{
-		switch(medium->getIndex())
-		{
-		case MEDIUM_INDEX_AUTO:
-			DbgPrint("Selected medium is autoselect\n");
-			adapter_.link_speed = SPEED_1000;
-			adapter_.link_duplex = FULL_DUPLEX;
-			adapter_.hw.media_type = MEDIA_TYPE_AUTO_SENSOR;
-			break;
-		case MEDIUM_INDEX_10HD:
-			DbgPrint("Selected medium is 10HD\n");
-			adapter_.link_speed = SPEED_10;
-			adapter_.link_duplex = HALF_DUPLEX;	
-			adapter_.hw.media_type = MEDIA_TYPE_10M_HALF;
-			break;
-		case MEDIUM_INDEX_10FD:
-			DbgPrint("Selected medium is 10FD\n");
-			adapter_.link_speed = SPEED_10;
-			adapter_.link_duplex = FULL_DUPLEX;	
-			adapter_.hw.media_type = MEDIA_TYPE_10M_FULL;
-			break;
-		case MEDIUM_INDEX_100HD:
-			DbgPrint("Selected medium is 100HD\n");
-			adapter_.link_speed = SPEED_100;
-			adapter_.link_duplex = HALF_DUPLEX;		
-			adapter_.hw.media_type = MEDIA_TYPE_100M_HALF;
-			break;
-		case MEDIUM_INDEX_100FD:
-			DbgPrint("Selected medium is 100FD\n");
-			adapter_.link_speed = SPEED_100;
-			adapter_.link_duplex = FULL_DUPLEX;		
-			adapter_.hw.media_type = MEDIA_TYPE_100M_FULL;
-			break;
-		case MEDIUM_INDEX_1000HD:
-			DbgPrint("Selected medium is 1000HD\n");
-			adapter_.link_speed = SPEED_1000;
-			adapter_.link_duplex = HALF_DUPLEX;	
-			adapter_.hw.media_type = MEDIA_TYPE_1000M_FULL;
-			break;
-		case MEDIUM_INDEX_1000FD:
-			DbgPrint("Selected medium is 1000FD\n");
-			adapter_.link_speed = SPEED_1000;
-			adapter_.link_duplex = FULL_DUPLEX;		
-			adapter_.hw.media_type = MEDIA_TYPE_1000M_FULL;
-			break;
-		}	
+		if (atGetNicType() == TYPE_GIGABIT){
+			switch(medium->getIndex())
+			{
+				case MEDIUM_INDEX_AUTO_GIGABIT:
+					DbgPrint("Selected medium is autoselect\n");
+					adapter_.link_speed = SPEED_1000;
+					adapter_.link_duplex = FULL_DUPLEX;
+					adapter_.hw.media_type = MEDIA_TYPE_AUTO_SENSOR;
+					break;
+				case MEDIUM_INDEX_10HD:
+					DbgPrint("Selected medium is 10HD\n");
+					adapter_.link_speed = SPEED_10;
+					adapter_.link_duplex = HALF_DUPLEX;	
+					adapter_.hw.media_type = MEDIA_TYPE_10M_HALF;
+					break;
+				case MEDIUM_INDEX_10FD:
+					DbgPrint("Selected medium is 10FD\n");
+					adapter_.link_speed = SPEED_10;
+					adapter_.link_duplex = FULL_DUPLEX;	
+					adapter_.hw.media_type = MEDIA_TYPE_10M_FULL;
+					break;
+				case MEDIUM_INDEX_100HD:
+					DbgPrint("Selected medium is 100HD\n");
+					adapter_.link_speed = SPEED_100;
+					adapter_.link_duplex = HALF_DUPLEX;		
+					adapter_.hw.media_type = MEDIA_TYPE_100M_HALF;
+					break;
+				case MEDIUM_INDEX_100FD:
+					DbgPrint("Selected medium is 100FD\n");
+					adapter_.link_speed = SPEED_100;
+					adapter_.link_duplex = FULL_DUPLEX;		
+					adapter_.hw.media_type = MEDIA_TYPE_100M_FULL;
+					break;
+				case MEDIUM_INDEX_1000HD:
+					DbgPrint("Selected medium is 1000HD\n");
+					adapter_.link_speed = SPEED_1000;
+					adapter_.link_duplex = HALF_DUPLEX;	
+					adapter_.hw.media_type = MEDIA_TYPE_1000M_FULL;
+					break;
+				case MEDIUM_INDEX_1000FD:
+					DbgPrint("Selected medium is 1000FD\n");
+					adapter_.link_speed = SPEED_1000;
+					adapter_.link_duplex = FULL_DUPLEX;		
+					adapter_.hw.media_type = MEDIA_TYPE_1000M_FULL;
+					break;
+			}	
+		}else{ //TYPE_FAST
+			switch(medium->getIndex())
+			{
+				case MEDIUM_INDEX_AUTO_FAST:
+					DbgPrint("Selected medium is autoselect\n");
+					adapter_.link_speed = SPEED_100;
+					adapter_.link_duplex = FULL_DUPLEX;
+					adapter_.hw.media_type = MEDIA_TYPE_AUTO_SENSOR;
+					break;
+				case MEDIUM_INDEX_10HD:
+					DbgPrint("Selected medium is 10HD\n");
+					adapter_.link_speed = SPEED_10;
+					adapter_.link_duplex = HALF_DUPLEX;	
+					adapter_.hw.media_type = MEDIA_TYPE_10M_HALF;
+					break;
+				case MEDIUM_INDEX_10FD:
+					DbgPrint("Selected medium is 10FD\n");
+					adapter_.link_speed = SPEED_10;
+					adapter_.link_duplex = FULL_DUPLEX;	
+					adapter_.hw.media_type = MEDIA_TYPE_10M_FULL;
+					break;
+				case MEDIUM_INDEX_100HD:
+					DbgPrint("Selected medium is 100HD\n");
+					adapter_.link_speed = SPEED_100;
+					adapter_.link_duplex = HALF_DUPLEX;		
+					adapter_.hw.media_type = MEDIA_TYPE_100M_HALF;
+					break;
+				case MEDIUM_INDEX_100FD:
+					DbgPrint("Selected medium is 100FD\n");
+					adapter_.link_speed = SPEED_100;
+					adapter_.link_duplex = FULL_DUPLEX;		
+					adapter_.hw.media_type = MEDIA_TYPE_100M_FULL;
+					break;
+			}	
+		}
+		
 		atSetupLink();
 
 		setCurrentMedium(medium);
@@ -629,7 +677,12 @@ IOReturn AtherosL1cEthernet::selectMedium(const IONetworkMedium *medium)
 	}
 
 	//Refresh link status
-	IOSleep(100*((medium->getIndex() == MEDIUM_INDEX_AUTO)? PHY_AUTO_NEG_TIME:PHY_FORCE_TIME));
+	if (atGetNicType() == TYPE_GIGABIT){
+		IOSleep(100*((medium->getIndex() == MEDIUM_INDEX_AUTO_GIGABIT)? PHY_AUTO_NEG_TIME:PHY_FORCE_TIME));
+	}else{ //TYPE_FAST
+		IOSleep(100*((medium->getIndex() == MEDIUM_INDEX_AUTO_FAST)? PHY_AUTO_NEG_TIME:PHY_FORCE_TIME));
+	}
+	
 	atGetAndUpdateLinkStatus();
 
 	return kIOReturnSuccess;
@@ -926,7 +979,6 @@ bool AtherosL1cEthernet::atProbe()
 {	
 	DbgPrint("atProbe()\n");
 	
-	u16	vendorId, deviceId;
     atl1c_adapter *adapter=&adapter_;
 	s32 err = 0;
 	
@@ -934,10 +986,10 @@ bool AtherosL1cEthernet::atProbe()
 	pdev->setBusMasterEnable(true);
 	pdev->setMemoryEnable(true);
 	pdev->setIOEnable(false);
-	vendorId = pdev->configRead16(kIOPCIConfigVendorID);
-	deviceId = pdev->configRead16(kIOPCIConfigDeviceID);
+	vendorId_ = pdev->configRead16(kIOPCIConfigVendorID);
+	deviceId_ = pdev->configRead16(kIOPCIConfigDeviceID);
 
-	DbgPrint("Vendor ID %x, device ID %x\n", vendorId, deviceId);
+	DbgPrint("Vendor ID %x, device ID %x\n", vendorId_, deviceId_);
 	DbgPrint("MMR0 address %x\n", (u32)pdev->configRead32(kIOPCIConfigBaseAddress0));
 
 	pdev->enablePCIPowerManagement();
@@ -1033,8 +1085,13 @@ void AtherosL1cEthernet::atGetAndUpdateLinkStatus()
 	atl1c_hw *hw = &adapter->hw;
 	
 	u16 speed, duplex;
-	u32 currentMediumIndex = MEDIUM_INDEX_AUTO;
-
+	u32 currentMediumIndex;
+	if (atGetNicType() == TYPE_GIGABIT){
+		currentMediumIndex = MEDIUM_INDEX_AUTO_GIGABIT;
+	}else{ //TYPE_FAST
+		currentMediumIndex = MEDIUM_INDEX_AUTO_FAST;
+	}
+	
 	if(atl1c_get_speed_and_duplex(&adapter_.hw, &speed, &duplex) == 0)
 	{
 		DbgPrint("Link is active, speed %d, duplex %d\n", speed, duplex);
@@ -1098,5 +1155,41 @@ s32 AtherosL1cEthernet::atSetupLink()
 	//hw->phy_configured = true;
 	return ret_val;
 }
-
+/*
+ *  Driver	Model-name	vendor:device	Type
+ *  atl1c 	AR8131		1969:1063	Gigabit Ethernet
+ *  atl1c	AR8132		1969:1062	Fast Ethernet
+ *  atl1c	AR8151(v1.0)	1969:1073	Gigabit Ethernet
+ *  atl1c	AR8152(v1.1)	1969:2060	Fast Ethernet
+ *  This device has no hardware available yet so it goes untested,
+ *  but it should work:
+ *  atl1c	AR8152(v2.0)	1969:2062	Fast Ethernet
+*/
+u32 AtherosL1cEthernet::atGetNicType()
+{
+	
+	u32 ret_val = TYPE_GIGABIT;
+	
+	switch (deviceId_) {
+		case DEV_ID_ATL1C_2_0:
+			ret_val = TYPE_GIGABIT;
+			break;
+		case DEV_ID_ATL2C_2_0:
+			ret_val = TYPE_FAST;
+			break;
+		case DEV_ID_ATL2C_B:
+			 ret_val = TYPE_FAST;
+             break;
+		case DEV_ID_ATL2C_B_2:
+			ret_val = TYPE_FAST;
+			break;	
+		case DEV_ID_ATL1D:
+			ret_val = TYPE_GIGABIT;
+			break;
+		default:
+			break;
+	}
+	
+	return ret_val;
+}
 
