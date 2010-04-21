@@ -57,10 +57,18 @@ enum
 	MEDIUM_INDEX_10FD	= 1,
 	MEDIUM_INDEX_100HD	= 2,
 	MEDIUM_INDEX_100FD	= 3,
+	MEDIUM_INDEX_AUTO_FAST	= 4,
+	MEDIUM_INDEX_COUNT_FAST	= 5,
 	MEDIUM_INDEX_1000HD = 4,
 	MEDIUM_INDEX_1000FD = 5,
-	MEDIUM_INDEX_AUTO	= 6,
-	MEDIUM_INDEX_COUNT	= 7
+	MEDIUM_INDEX_AUTO_GIGABIT = 6,
+	MEDIUM_INDEX_COUNT_GIGABIT	= 7
+};
+
+enum
+{
+	TYPE_GIGABIT	= 0,
+	TYPE_FAST	= 1	
 };
 
 #define MBit							1000000
@@ -110,13 +118,13 @@ private:
 	virtual void				atSwFree();
 
 	//Hardware functions
-    virtual s32				atSetupLink();
+    virtual s32				    atSetupLink();
 	virtual void				atGetAndUpdateLinkStatus();
-
+	virtual u32				    atGetNicType();
 private:
 	//Private fields, w/o methods
 	atl1c_adapter				adapter_;
-
+ 	u16	                        vendorId_, deviceId_;
 	IOMemoryMap					*hw_addr_;
 	IOEthernetInterface			*netIface_;
 	IONetworkStats				*netStats_;
@@ -124,7 +132,7 @@ private:
 	IOWorkLoop					*workLoop_;
 	IOOutputQueue				*transmitQueue_;
 	OSDictionary				*mediumDict;
-	const IONetworkMedium		*mediumTable[MEDIUM_INDEX_COUNT];
+	const IONetworkMedium		*mediumTable[MEDIUM_INDEX_COUNT_GIGABIT];
 	IOInterruptEventSource		*intSource_;
 };
 
