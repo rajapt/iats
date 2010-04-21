@@ -429,9 +429,11 @@ void AtherosL1cEthernet::atl1c_clean_rx_irq(struct atl1c_adapter *adapter, u8 qu
 		count++;
 		
 	}
-	//if (count)
-	//	atl1c_alloc_rx_buffer(adapter, que);
-
+	if (count) {
+		/* TODO: update mailbox here */
+		AT_WRITE_REG(&adapter->hw, atl1c_rfd_prod_idx_regs[ringid],
+				 rfd_ring->next_to_use & MB_RFDX_PROD_IDX_MASK);
+	}
 }
 
 
@@ -683,7 +685,7 @@ IOReturn AtherosL1cEthernet::selectMedium(const IONetworkMedium *medium)
 		IOSleep(100*((medium->getIndex() == MEDIUM_INDEX_AUTO_FAST)? PHY_AUTO_NEG_TIME:PHY_FORCE_TIME));
 	}
 	
-	atGetAndUpdateLinkStatus();
+	//atGetAndUpdateLinkStatus();
 
 	return kIOReturnSuccess;
 }
