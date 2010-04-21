@@ -110,7 +110,7 @@ private:
 	virtual void				atSwFree();
 
 	//Hardware functions
-    virtual SInt32				atSetupLink();
+    virtual s32				atSetupLink();
 	virtual void				atGetAndUpdateLinkStatus();
 
 private:

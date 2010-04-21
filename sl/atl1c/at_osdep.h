@@ -34,13 +34,13 @@
 
 #define u8		UInt8
 #define u16		UInt16
-#define u32		UInt32
+#define u32		unsigned int
 #define u64		UInt64
-#define s32		SInt32
+#define s32		signed int
 
-#define spinlock_t	IOSimpleLock * 
-#define dma_addr_t  IOPhysicalAddress
-#define atomic_t    volatile SInt32
+//#define spinlock_t	IOSimpleLock * 
+#define dma_addr_t  IOPhysicalAddress32
+#define atomic_t    volatile signed int
 
 #define usec_delay(x) IODelay(x)
 #define msec_delay(x) IOSleep(x)
