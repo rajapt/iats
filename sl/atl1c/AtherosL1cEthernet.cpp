@@ -277,10 +277,10 @@ void AtherosL1cEthernet::atIntr(OSObject *client, IOInterruptEventSource *src, i
 			AT_ERR(
 					"atl1c hardware error (status = 0x%x)\n",
 					(status & ISR_ERROR));
-			/* reset MAC */
-			IOSleep(2);
-			atl1c_reset_mac(&adapter->hw);
-			return ;
+			/* reset MAC  to-do*/
+			//IOSleep(2);
+			//atl1c_reset_mac(&adapter->hw);
+			//return ;
 		}
 		if (status & ISR_RX_PKT) {
 
