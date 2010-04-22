@@ -32,7 +32,7 @@
 /* added */
 #define PHY_AUTO_NEG_TIME               45          /* 4.5 Seconds */
 #define PHY_FORCE_TIME                  20          /* 2.0 Seconds */
-#define MAX_TX_BUF_LEN					0x3000
+#define MAX_TX_BUF_LEN					2000
 /*
       IEEE 802.3 Ethernet magic constants.  The frame sizes omit the preamble
       and FCS/CRC (frame check sequence).
@@ -118,7 +118,8 @@ _vlan = ((((_tag) >> 8) & 0xFF) |\
 #define AT_ERR_PHY_RES     8
 #define AT_ERR_TIMEOUT     9
 
-#define AT_RX_BUF_SIZE		1536
+//#define AT_RX_BUF_SIZE		1536
+#define AT_RX_BUF_SIZE		2000
 #define MAX_JUMBO_FRAME_SIZE 	(9*1024)	
 #define MAX_TSO_FRAME_SIZE	(7*1024)
 #define MAX_TX_OFFLOAD_THRESH	(9*1024)
