@@ -281,6 +281,7 @@ void AtherosL1cEthernet::atIntr(OSObject *client, IOInterruptEventSource *src, i
 			//IOSleep(2);
 			//atl1c_reset_mac(&adapter->hw);
 			//return ;
+			break;
 		}
 		if (status & ISR_RX_PKT) {
 
@@ -335,11 +336,11 @@ bool AtherosL1cEthernet::atl1c_clean_tx_irq(atl1c_adapter *adapter,atl1c_trans_q
 	
 	while (next_to_clean != hw_next_to_clean) {
 		buffer_info = &tpd_ring->buffer_info[next_to_clean];
-		if (buffer_info->state == ATL1_BUFFER_BUSY) {
+		/*if (buffer_info->state == ATL1_BUFFER_BUSY) {
 			// TO-DO clean
-			//buffer_info->dma = 0;
+			buffer_info->dma = 0;
 			buffer_info->state = ATL1_BUFFER_FREE;
-		}
+		}*/
 		if (++next_to_clean == tpd_ring->count)
 			next_to_clean = 0;
 		atomic_set(&tpd_ring->next_to_clean, next_to_clean);
@@ -796,11 +797,17 @@ UInt32 AtherosL1cEthernet::outputPacket(mbuf_t m, void *prm)
 	do
 	{
 	if (mbuf_data(cur_buf))	bcopy(mbuf_data(cur_buf), data_ptr, mbuf_len(cur_buf));
-	data_ptr += mbuf_len(cur_buf);
-	pkt_snd_len += mbuf_len(cur_buf);
+		data_ptr += mbuf_len(cur_buf);
+		pkt_snd_len += mbuf_len(cur_buf);
 	}
 	while(((cur_buf = mbuf_next(cur_buf)) != NULL) && ((pkt_snd_len + mbuf_len(cur_buf)) <= buf_len));
 	 
+	buffer_info->length = pkt_snd_len;
+	use_tpd->buffer_addr = OSSwapHostToLittleInt64(buffer_info->dma);
+	use_tpd->buffer_len = OSSwapHostToLittleInt64(buffer_info->length);
+	/* The last tpd */
+	use_tpd->word1 |= 1 << TPD_EOP_SHIFT;
+	
 	u32 prod_data;
 
 	AT_READ_REG(&adapter->hw, REG_MB_PRIO_PROD_IDX, &prod_data);
