@@ -322,7 +322,6 @@ bool AtherosL1cEthernet::atl1c_clean_tx_irq(atl1c_adapter *adapter,atl1c_trans_q
 	u16 shift;
 	u32 data;
 
-	
 	if (type == atl1c_trans_high)
 		shift = MB_HTPD_CONS_IDX_SHIFT;
 	else
@@ -429,7 +428,6 @@ void AtherosL1cEthernet::atl1c_clean_rx_irq(struct atl1c_adapter *adapter, u8 qu
 		netIface_->flushInputQueue();   
 	
 		count++;
-		
 	}
 	//if (count)
 	//	atl1c_alloc_rx_buffer(adapter, que);
