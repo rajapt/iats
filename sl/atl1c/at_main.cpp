@@ -1295,13 +1295,14 @@ void atl1c_clear_phy_int(atl1c_adapter *adapter)
 		num_alloc++;
 	}
 */
-/*	if (num_alloc) {
+    if (num_alloc) {
 		// TODO: update mailbox here 
-		rfd_ring->next_to_use = rfd_next_to_use;
+		//rfd_ring->next_to_use = rfd_next_to_use;
+	    rfd_ring->next_to_use = 0;
 		AT_WRITE_REG(&adapter->hw, atl1c_rfd_prod_idx_regs[ringid],
 					 rfd_ring->next_to_use & MB_RFDX_PROD_IDX_MASK);
 	}
-*/
+
 	DbgPrint("Total allocated space for rx descriptors D%d; num_alloc= D%d; adapter->rx_buffer_len= D%d\n",
 			 num_alloc * adapter->rx_buffer_len,num_alloc , adapter->rx_buffer_len);
 	
