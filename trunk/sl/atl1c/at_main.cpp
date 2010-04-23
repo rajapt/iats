@@ -112,7 +112,7 @@ void atl1c_reset_pcie(IOPCIDevice *pdev,atl1c_hw *hw, u32 flag)
 	u32 pci_cmd;
 	
 	
-    pdev->configRead32(kIOPCIConfigCommand) ;
+    pci_cmd = pdev->configRead32(kIOPCIConfigCommand) ;
 	
     
     if (pci_cmd & 0x0400)
@@ -607,9 +607,6 @@ void atl1c_free_ring_resources(struct atl1c_adapter *adapter)
 	ring_header->dma = ring_header->memDesc->getPhysicalSegment(0, &dmaLength);
 	ring_header->desc = ring_header->memDesc->getBytesNoCopy();
 	memset(ring_header->desc, 0, ring_header->size);
-	DbgPrint("ringheader , dma = 0x%lx ; desc = 0x%lx\n", 
-			 (long unsigned int)(ring_header->memDesc->getPhysicalSegment(0, &dmaLength)), 
-			 (long unsigned int)(ring_header->memDesc->getBytesNoCopy()));
 	
 	/* init TPD ring */
 	
