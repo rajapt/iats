@@ -350,13 +350,6 @@ bool AtherosL1cEthernet::atl1c_clean_tx_irq(atl1c_adapter *adapter,atl1c_trans_q
 	return true;
 }
 
-static const u16 atl1c_rfd_prod_idx_regs[AT_MAX_RECEIVE_QUEUE] =
-{
-	REG_MB_RFD0_PROD_IDX,
-	REG_MB_RFD1_PROD_IDX,
-	REG_MB_RFD2_PROD_IDX,
-	REG_MB_RFD3_PROD_IDX
-};
 
 void AtherosL1cEthernet::atl1c_clean_rx_irq(struct atl1c_adapter *adapter, u8 que)
 {
@@ -374,8 +367,8 @@ void AtherosL1cEthernet::atl1c_clean_rx_irq(struct atl1c_adapter *adapter, u8 qu
 	atl1c_recv_ret_status *rrs;
 	atl1c_buffer *buffer_info;
 	
-	DbgPrint("atl1c_clean_rx_irq()  que=%d, rrd_ring->next_to_clean=%d\n",
-              que, rrd_ring->next_to_clean);
+	DbgPrint("atl1c_clean_rx_irq()  que=%d,  rrd_ring->next_to_use=%d,rrd_ring->next_to_clean=%d\n",
+              que,  rrd_ring->next_to_use,rrd_ring->next_to_clean);
 	
 	while (1) {
 
@@ -438,11 +431,8 @@ void AtherosL1cEthernet::atl1c_clean_rx_irq(struct atl1c_adapter *adapter, u8 qu
 		count++;
 		
 	}
-	if (count) {
-		/* TODO: update mailbox here */
-		AT_WRITE_REG(&adapter->hw, atl1c_rfd_prod_idx_regs[que],
-				 rfd_ring->next_to_use & MB_RFDX_PROD_IDX_MASK);
-	}
+	//if (count)
+	//	atl1c_alloc_rx_buffer(adapter, que);
 }
 
 
