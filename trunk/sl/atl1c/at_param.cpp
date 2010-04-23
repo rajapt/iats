@@ -90,11 +90,11 @@ void atl1c_check_options(atl1c_adapter *adapter)
     }
     
     { /* Interrupt Moderate Timer  */
-         def  = INT_MOD_DEFAULT_CNT * 5;
+         def  = INT_MOD_DEFAULT_CNT * 20;
          adapter->hw.tx_imt = (u16)def;          
     }
     { /* Interrupt Moderate Timer  */
-         def  = INT_MOD_DEFAULT_CNT;
+         def  = INT_MOD_DEFAULT_CNT * 5;
          adapter->hw.rx_imt = (u16)def;          
     }
     { /* MediaType */
