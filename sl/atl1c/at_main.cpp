@@ -374,7 +374,7 @@ s32 atl1c_alloc_tx_buffers(atl1c_adapter *adapter,
 		
 		IOByteCount length;
 		buffer_info->dma = buffer_info->memDesc->getPhysicalSegment(0, &length);
-		//buffer_info->state = ATL1_BUFFER_BUSY;
+		buffer_info->state = ATL1_BUFFER_BUSY;
 		buffer_info->length = length;
 		tpd_desc->buffer_addr = OSSwapHostToLittleInt64(buffer_info->dma);
 		num_alloc++;
@@ -410,7 +410,7 @@ void atl1c_clean_tx_ring(struct atl1c_adapter *adapter,
 			buffer_info->memDesc->release();
 			buffer_info->memDesc = NULL;
 		}
-		//buffer_info->state = ATL1_BUFFER_FREE;
+		buffer_info->state = ATL1_BUFFER_FREE;
 	}
 	
 	/* Zero out Tx-buffers */
@@ -445,7 +445,7 @@ void atl1c_clean_rx_ring(atl1c_adapter *adapter)
 				buffer_info->memDesc->release();
 				buffer_info->memDesc = NULL;
 			}
-			//buffer_info->state = ATL1_BUFFER_FREE;
+			buffer_info->state = ATL1_BUFFER_FREE;
 		}
 		/* zero out the descriptor ring */
 		memset(rfd_ring[i].desc, 0, rfd_ring[i].size);
@@ -465,25 +465,24 @@ void atl1c_init_ring_ptrs(atl1c_adapter *adapter)
 	struct atl1c_rfd_ring *rfd_ring = adapter->rfd_ring;
 	struct atl1c_rrd_ring *rrd_ring = adapter->rrd_ring;
 	struct atl1c_buffer *buffer_info;
-	int i;
-	//int i, j;
+	int i, j;
 	
 	for (i = 0; i < AT_MAX_TRANSMIT_QUEUE; i++) {
 		tpd_ring[i].next_to_use = 0;
 		atomic_set(&tpd_ring[i].next_to_clean, 0);
 		buffer_info = tpd_ring[i].buffer_info;
-		//for (j = 0; j < tpd_ring->count; j++)
-		//	buffer_info[j].state = ATL1_BUFFER_FREE;
+		for (j = 0; j < tpd_ring->count; j++)
+			buffer_info[j].state = ATL1_BUFFER_FREE;
 	}
 	for (i = 0; i < adapter->num_rx_queues; i++) {
 		rfd_ring[i].next_to_use = 0;
 		rfd_ring[i].next_to_clean = 0;
 		rrd_ring[i].next_to_use = 0;
 		rrd_ring[i].next_to_clean = 0;
-		//for (j = 0; j < rfd_ring[i].count; j++) {
-		//	buffer_info = &rfd_ring[i].buffer_info[j];
-		//	buffer_info->state = ATL1_BUFFER_FREE;
-		//}
+		for (j = 0; j < rfd_ring[i].count; j++) {
+			buffer_info = &rfd_ring[i].buffer_info[j];
+			buffer_info->state = ATL1_BUFFER_FREE;
+		}
 	}
 }
 
@@ -1235,18 +1234,18 @@ void atl1c_clear_phy_int(atl1c_adapter *adapter)
 {
 	struct atl1c_rfd_ring *rfd_ring = &adapter->rfd_ring[ringid];
 
-	struct atl1c_buffer *buffer_info;//, *next_info;
+	struct atl1c_buffer *buffer_info, *next_info;
 
 	u16 num_alloc = 0;
-//		u16 rfd_next_to_use, next_next;
-		struct atl1c_rx_free_desc *rfd_desc;
-/*	
+	u16 rfd_next_to_use, next_next;
+	struct atl1c_rx_free_desc *rfd_desc;
+	
 	next_next = rfd_next_to_use = rfd_ring->next_to_use;
 	if (++next_next == rfd_ring->count)
 		next_next = 0;
 	buffer_info = &rfd_ring->buffer_info[rfd_next_to_use];
 	next_info = &rfd_ring->buffer_info[next_next];
-*/	
+/*	
 	for (u32 index = 0; index < rfd_ring->count; index++) {
 		buffer_info = &rfd_ring->buffer_info[index];
 		rfd_desc = ATL1C_RFD_DESC(rfd_ring, index); 
@@ -1259,15 +1258,24 @@ void atl1c_clear_phy_int(atl1c_adapter *adapter)
 
 		IOByteCount length;
 		buffer_info->dma = buffer_info->memDesc->getPhysicalSegment(0, &length);
-		//buffer_info->state = ATL1_BUFFER_BUSY;
+		buffer_info->state = ATL1_BUFFER_BUSY;
 		buffer_info->length = adapter->rx_buffer_len;
 		
 		rfd_desc->buffer_addr = OSSwapHostToLittleInt64(buffer_info->dma);
 		num_alloc++;
 	}
-/*
+*/
 	while (next_info->state == ATL1_BUFFER_FREE) {
 		rfd_desc = ATL1C_RFD_DESC(rfd_ring, rfd_next_to_use);
+		
+		if (buffer_info->dma) {
+			buffer_info->dma = 0;
+		}
+		if (buffer_info->memDesc) {
+			buffer_info->memDesc->complete();
+			buffer_info->memDesc->release();
+			buffer_info->memDesc = NULL;
+		}
 		
 		buffer_info->memDesc = IOBufferMemoryDescriptor::withOptions(0,adapter->rx_buffer_len);
 		if (!buffer_info->memDesc || buffer_info->memDesc->prepare() != kIOReturnSuccess)
@@ -1291,17 +1299,15 @@ void atl1c_clear_phy_int(atl1c_adapter *adapter)
 		next_info = &rfd_ring->buffer_info[next_next];
 		num_alloc++;
 	}
-*/
+
     if (num_alloc) {
 		// TODO: update mailbox here 
-		//rfd_ring->next_to_use = rfd_next_to_use;
-	    rfd_ring->next_to_use = rfd_ring->count - 1;
-		AT_WRITE_REG(&adapter->hw, atl1c_rfd_prod_idx_regs[ringid],
+		rfd_ring->next_to_use = rfd_next_to_use;
+	    AT_WRITE_REG(&adapter->hw, atl1c_rfd_prod_idx_regs[ringid],
 					 rfd_ring->next_to_use & MB_RFDX_PROD_IDX_MASK);
+		DbgPrint("Total allocated space for rx descriptors D%d; num_alloc= D%d; adapter->rx_buffer_len= D%d\n",
+				 num_alloc * adapter->rx_buffer_len,num_alloc , adapter->rx_buffer_len);
 	}
-
-	DbgPrint("Total allocated space for rx descriptors D%d; num_alloc= D%d; adapter->rx_buffer_len= D%d\n",
-			 num_alloc * adapter->rx_buffer_len,num_alloc , adapter->rx_buffer_len);
 	
 	return num_alloc? 0 : -1 ;
 }
@@ -1325,12 +1331,20 @@ void atl1c_clean_rfd(struct atl1c_rfd_ring *rfd_ring,
 {
 	u16 i;
 	u16 rfd_index;
-	//struct atl1c_buffer *buffer_info = rfd_ring->buffer_info;
+	struct atl1c_buffer *buffer_info = rfd_ring->buffer_info;
 	
 	rfd_index = (rrs->word0 >> RRS_RX_RFD_INDEX_SHIFT) &
 	RRS_RX_RFD_INDEX_MASK;
 	for (i = 0; i < num; i++) {
-		//buffer_info[rfd_index].state = ATL1_BUFFER_FREE;
+		if (buffer_info[rfd_index].dma) {
+			buffer_info[rfd_index].dma = 0;
+		}
+		if (buffer_info[rfd_index].memDesc) {
+			buffer_info[rfd_index].memDesc->complete();
+			buffer_info[rfd_index].memDesc->release();
+			buffer_info[rfd_index].memDesc = NULL;
+		}
+		buffer_info[rfd_index].state = ATL1_BUFFER_FREE;
 		if (++rfd_index == rfd_ring->count)
 			rfd_index = 0;
 	}

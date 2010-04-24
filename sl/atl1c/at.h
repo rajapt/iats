@@ -540,9 +540,9 @@ struct atl1c_buffer {
 	//struct sk_buff *skb;    /* socket buffer */
 	IOBufferMemoryDescriptor *memDesc;
 	u16 length;             /* rx buffer length */
-//	u16 state;		/* state of buffer */
-//#define ATL1_BUFFER_FREE	0
-//#define ATL1_BUFFER_BUSY	1
+	u16 state;		/* state of buffer */
+#define ATL1_BUFFER_FREE	0
+#define ATL1_BUFFER_BUSY	1
 	dma_addr_t dma;
 };
 
