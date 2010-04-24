@@ -1295,7 +1295,7 @@ void atl1c_clear_phy_int(atl1c_adapter *adapter)
     if (num_alloc) {
 		// TODO: update mailbox here 
 		//rfd_ring->next_to_use = rfd_next_to_use;
-	    rfd_ring->next_to_use = 0;
+	    rfd_ring->next_to_use = rfd_ring->count - 1;
 		AT_WRITE_REG(&adapter->hw, atl1c_rfd_prod_idx_regs[ringid],
 					 rfd_ring->next_to_use & MB_RFDX_PROD_IDX_MASK);
 	}
