@@ -291,10 +291,18 @@ void AtherosL1cEthernet::atIntr(OSObject *client, IOInterruptEventSource *src, i
 		if (status & ISR_TX_PKT)
 			atl1c_clean_tx_irq(adapter, atl1c_trans_normal);
 		
-		if (status & ISR_OVER)
+		if (status & ISR_OVER){
 			AT_ERR(
 					"TX/RX over flow (status = 0x%x)\n",
 					(status & ISR_OVER));
+			// for sleep issue
+			// Let controller know availability of new Rx buffers.
+			if (status & ISR_HW_RXF_OV){
+				for (u32 i = 0; i < adapter->num_rx_queues; i++) {
+					atl1c_alloc_rx_buffer(adapter, i);
+				}
+			}
+		}
 		
 		/* link event */
 		if (status & (ISR_GPHY | ISR_MANUAL)) {
@@ -366,8 +374,8 @@ void AtherosL1cEthernet::atl1c_clean_rx_irq(struct atl1c_adapter *adapter, u8 qu
 	atl1c_recv_ret_status *rrs;
 	atl1c_buffer *buffer_info;
 	
-	DbgPrint("atl1c_clean_rx_irq()  que=%d,  rrd_ring->next_to_use=%d,rrd_ring->next_to_clean=%d\n",
-              que,  rrd_ring->next_to_use,rrd_ring->next_to_clean);
+	DbgPrint("atl1c_clean_rx_irq()  que=%d,  rfd_ring->next_to_clean=%d,rrd_ring->next_to_clean=%d\n",
+              que,  rfd_ring->next_to_clean ,rrd_ring->next_to_clean);
 	
 	while (1) {
 

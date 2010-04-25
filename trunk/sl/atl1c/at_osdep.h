@@ -39,7 +39,7 @@
 #define s32		signed int
 
 //#define spinlock_t	IOSimpleLock * 
-#define dma_addr_t  IOPhysicalAddress32
+#define dma_addr_t  IOPhysicalAddress
 #define atomic_t    volatile signed int
 
 #define usec_delay(x) IODelay(x)
