@@ -10,4 +10,4 @@ sudo kextunload  /System/Library/Extensions/AtherosL1cEthernet.kext
 sudo rm -R /System/Library/Extensions/AtherosL1cEthernet.kext
 
 echo "restore file attributes..."
-sudo chown -R `whoami` /System/Library/Extensions/AtherosL1cEthernet.kext
+sudo kextcache -system-mkext /System/Library/Extensions
