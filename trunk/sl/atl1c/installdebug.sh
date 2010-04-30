@@ -12,5 +12,5 @@ sudo find /System/Library/Extensions/AtherosL1cEthernet.kext -type d -exec chmod
 sudo find /System/Library/Extensions/AtherosL1cEthernet.kext -type f -exec chmod 0644 {} \; 
 
 sudo kextload -t AtherosL1cEthernet.kext
-sudo kextcache -k /System/Library/Extensions
+sudo kextcache -system-mkext /System/Library/Extensions
 
