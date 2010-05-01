@@ -53,15 +53,6 @@
 		089C166AFE841209C02AAC07 /* AtherosL2Ethernet */ = {
 			isa = PBXGroup;
 			children = (
-				21410B640F7ACAA100A67193 /* at.h */,
-				21410B650F7ACAA100A67193 /* at_hw.cpp */,
-				21410B660F7ACAA100A67193 /* at_hw.h */,
-				21410B670F7ACAA100A67193 /* at_main.cpp */,
-				21410B680F7ACAA100A67193 /* at_main.h */,
-				21410B690F7ACAA100A67193 /* at_osdep.h */,
-				21410B6A0F7ACAA100A67193 /* at_param.cpp */,
-				21410B6B0F7ACAA100A67193 /* at_param.h */,
-				21410B6C0F7ACAA100A67193 /* mii.h */,
 				247142CAFF3F8F9811CA285C /* Source */,
 				8DA8362C06AD9B9200E5AC22 /* Kernel.framework */,
 				089C167CFE841241C02AAC07 /* Resources */,
@@ -90,6 +81,15 @@
 		247142CAFF3F8F9811CA285C /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				21410B640F7ACAA100A67193 /* at.h */,
+				21410B650F7ACAA100A67193 /* at_hw.cpp */,
+				21410B660F7ACAA100A67193 /* at_hw.h */,
+				21410B670F7ACAA100A67193 /* at_main.cpp */,
+				21410B680F7ACAA100A67193 /* at_main.h */,
+				21410B690F7ACAA100A67193 /* at_osdep.h */,
+				21410B6A0F7ACAA100A67193 /* at_param.cpp */,
+				21410B6B0F7ACAA100A67193 /* at_param.h */,
+				21410B6C0F7ACAA100A67193 /* mii.h */,
 				1A224C3EFF42367911CA2CB7 /* AtherosL2Ethernet.h */,
 				1A224C3FFF42367911CA2CB7 /* AtherosL2Ethernet.cpp */,
 			);
