@@ -887,7 +887,7 @@ bool AtherosL1eEthernet::atProbe()
 	IOPCIDevice	*pdev = adapter_.pdev;
 	pdev->setBusMasterEnable(true);
 	pdev->setMemoryEnable(true);
-	pdev->setIOEnable(false);
+	pdev->setIOEnable(true);
 	vendorId = pdev->configRead16(kIOPCIConfigVendorID);
 	deviceId = pdev->configRead16(kIOPCIConfigDeviceID);
 
@@ -899,16 +899,8 @@ bool AtherosL1eEthernet::atProbe()
 	hw_addr_ = pdev->mapDeviceMemoryWithRegister(kIOPCIConfigBaseAddress0);
 	if (hw_addr_ == NULL)
 	{
-		hw_addr_ = pdev->mapDeviceMemoryWithRegister(kIOPCIConfigBaseAddress1);
-		if (hw_addr_ == NULL)
-		{
-			hw_addr_ = pdev->mapDeviceMemoryWithRegister(kIOPCIConfigBaseAddress5);
-			if (hw_addr_ == NULL)
-			{
-				ErrPrint("Couldn't map io regs\n");
-				return false;
-			}
-		}
+		ErrPrint("Couldn't map io regs\n");
+		return false;
 	}
 
 	DbgPrint("Memory mapped at bus address %x, virtual address %x, length %d\n", (u32)hw_addr_->getPhysicalAddress(),
