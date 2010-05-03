@@ -355,7 +355,7 @@ at_free_ring_resources(struct at_adapter *adapter)
         IOFree(tpd_ring->buffer_info, tpd_ring->buffer_ring_size);
     }
     
-    if (ring_header->desc) {
+    if (ring_header->memDesc) {
         ring_header->memDesc->complete();
         ring_header->memDesc->release();
         ring_header->memDesc = NULL;

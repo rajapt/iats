@@ -504,6 +504,10 @@ at_phy_setup_autoneg_adv(struct at_hw *hw)
 			ADVERTISE_100_FULL|
 			ADVERTISE_1000_FULL;
 			break;
+		case MEDIA_TYPE_1000M_FULL:
+			mii_1000t_ctrl_reg |= MII_AT001_CR_1000T_FD_CAPS;
+			hw->autoneg_advertised |= ADVERTISE_1000_FULL;
+			break;
 			
 		case MEDIA_TYPE_100M_FULL:
 			mii_autoneg_adv_reg |= MII_AR_100TX_FD_CAPS;

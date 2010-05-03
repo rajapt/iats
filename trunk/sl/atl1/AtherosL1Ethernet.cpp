@@ -1050,7 +1050,7 @@ bool AtherosL1Ethernet::atProbe()
 
 
 #pragma mark -
-#pragma mark - Atheros L1e Hw methods
+#pragma mark - Atheros L1 Hw methods
 #pragma mark -
 
 void AtherosL1Ethernet::atGetAndUpdateLinkStatus()

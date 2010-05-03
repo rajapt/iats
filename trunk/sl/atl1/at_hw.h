@@ -139,7 +139,7 @@ void at_force_ps(struct at_hw* hw);
 #define     TWSI_CTRL_LD_SLV_ADDR_SHIFT     8
 #define     TWSI_CTRL_SW_LDSTART            0x800
 #define     TWSI_CTRL_HW_LDSTART            0x1000
-#define     TWSI_CTRL_SMB_SLV_ADDR_MASK     0x0x7F
+#define     TWSI_CTRL_SMB_SLV_ADDR_MASK     0x7F
 #define     TWSI_CTRL_SMB_SLV_ADDR_SHIFT    15
 #define     TWSI_CTRL_LD_EXIST              0x400000
 #define     TWSI_CTRL_READ_FREQ_SEL_MASK    0x3
