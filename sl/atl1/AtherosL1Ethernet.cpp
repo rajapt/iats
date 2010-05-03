@@ -563,7 +563,7 @@ IOReturn AtherosL1Ethernet::enable(IONetworkInterface *netif)
     }
     else
     {
-        DbgPrint("Selected medium index %d\n", medium->getIndex());
+        DbgPrint("Selected medium index %d\n", (s32)medium->getIndex());
     }
 
 
@@ -764,7 +764,7 @@ void AtherosL1Ethernet::getPacketBufferConstraints(IOPacketBufferConstraints *co
 
 UInt32 AtherosL1Ethernet::outputPacket(mbuf_t m, void *prm)
 {
-    UInt32 buf_len;
+    u32 buf_len;
     at_adapter *adapter=&adapter_;
 
     u16 next_to_use;
@@ -985,7 +985,7 @@ void AtherosL1Ethernet::mdio_write(int phy_id, int reg_num, int val)
  **/
 bool AtherosL1Ethernet::atProbe()
 {
-    UInt16  vendorId, deviceId;
+    u16  vendorId, deviceId;
     at_adapter *adapter=&adapter_;
     
     IOPCIDevice *pdev = adapter_.pdev;
@@ -996,7 +996,7 @@ bool AtherosL1Ethernet::atProbe()
     deviceId = pdev->configRead16(kIOPCIConfigDeviceID);
 
     DbgPrint("Vendor ID %x, device ID %x\n", vendorId, deviceId);
-    DbgPrint("MMR0 address %x\n", pdev->configRead32(kIOPCIConfigBaseAddress0));
+    DbgPrint("MMR0 address %x\n", (u32)pdev->configRead32(kIOPCIConfigBaseAddress0));
 
     pdev->enablePCIPowerManagement();
 
