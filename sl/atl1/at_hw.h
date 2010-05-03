@@ -35,8 +35,6 @@ struct at_hw;
 
 /* function prototype */
 
-/* function prototype */
-
 s32 at_reset_hw(struct at_hw* hw);
 s32 at_read_mac_addr(struct at_hw* hw);
 s32 at_init_hw(struct at_hw* hw);
