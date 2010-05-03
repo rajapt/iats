@@ -206,7 +206,7 @@ at_setup_ring_resources(struct at_adapter *adapter)
     //    DEBUGOUT1("TPD count = %x  RFD cont = %x  RRD = %x", 
     //        tpd_ring->count, rfd_ring->count, rrd_ring->count);
     
-    DEBUGOUT1("sz TPD:%d, sz RFD:%d, sz RRD:%d", 
+    DEBUGOUT1("sz TPD:%d, sz RFD:%d, sz RRD:%d\n", 
               (int)sizeof(TpdDescr),
               (int)sizeof(rx_free_desc_t),
               (int)sizeof(rx_return_desc_t));
@@ -263,7 +263,7 @@ at_setup_ring_resources(struct at_adapter *adapter)
     //    DEBUGOUT("memory allocated successfully !");    
     
     memset(ring_header->desc, 0, ring_header->size);
-    DEBUGOUT1("whole ring dma addr=%x", (u32)ring_header->dma);
+    DEBUGOUT1("whole ring dma addr=%x\n", (u32)ring_header->dma);
     
     // init TPD ring
     tpd_ring->dma = ring_header->dma;
@@ -271,7 +271,7 @@ at_setup_ring_resources(struct at_adapter *adapter)
     tpd_ring->dma += offset;
     tpd_ring->desc = (u8*) ring_header->desc + offset;
     tpd_ring->size = sizeof(TpdDescr) * tpd_ring->count;
-    DEBUGOUT1("tpd ring dma addr=%x", (u32)tpd_ring->dma);
+    DEBUGOUT1("tpd ring dma addr=%x\n", (u32)tpd_ring->dma);
     
     // init RFD ring
     rfd_ring->dma = tpd_ring->dma + tpd_ring->size;
@@ -279,7 +279,7 @@ at_setup_ring_resources(struct at_adapter *adapter)
     rfd_ring->dma += offset;
     rfd_ring->desc = (u8*) tpd_ring->desc + (tpd_ring->size+offset);
     rfd_ring->size = sizeof(rx_free_desc_t) * rfd_ring->count;
-    DEBUGOUT1("rfd ring dma addr=%x", (u32)rfd_ring->dma);
+    DEBUGOUT1("rfd ring dma addr=%x\n", (u32)rfd_ring->dma);
     
     // init RRD ring
     rrd_ring->dma = rfd_ring->dma + rfd_ring->size;
@@ -287,7 +287,7 @@ at_setup_ring_resources(struct at_adapter *adapter)
     rrd_ring->dma += offset;
     rrd_ring->desc = (u8*) rfd_ring->desc + (rfd_ring->size+offset);
     rrd_ring->size = sizeof(rx_return_desc_t) * rrd_ring->count;
-    DEBUGOUT1("rrd ring dma addr=%x", (u32)rrd_ring->dma);
+    DEBUGOUT1("rrd ring dma addr=%x\n", (u32)rrd_ring->dma);
     
     // init CMB
     adapter->cmb.dma = rrd_ring->dma + rrd_ring->size;
@@ -296,7 +296,7 @@ at_setup_ring_resources(struct at_adapter *adapter)
     adapter->cmb.cmb = 
     (coals_msg_block_t*)
     ((u8*)rrd_ring->desc + (rrd_ring->size+offset));
-    DEBUGOUT1("cmd dma addr=%x", (u32)adapter->cmb.dma);
+    DEBUGOUT1("cmd dma addr=%x\n", (u32)adapter->cmb.dma);
     
     // init SMB
     adapter->smb.dma = adapter->cmb.dma + sizeof(coals_msg_block_t);
@@ -305,7 +305,7 @@ at_setup_ring_resources(struct at_adapter *adapter)
     adapter->smb.smb = 
     (stats_msg_block_t*)
     ((u8*)adapter->cmb.cmb + (sizeof(coals_msg_block_t)+offset));
-    DEBUGOUT1("smb dma addr=%x", (u32)adapter->smb.dma);
+    DEBUGOUT1("smb dma addr=%x\n", (u32)adapter->smb.dma);
     
     return AT_SUCCESS;
 }
@@ -586,7 +586,7 @@ at_configure(struct at_adapter *adapter)
                  ENET_HEADER_SIZE + 
                  VLAN_SIZE +
                  ETHERNET_FCS_SIZE );
-    DEBUGOUT1("init MTU with 0x%x", hw->max_frame_size); 
+    DEBUGOUT1("init MTU with 0x%x\n", hw->max_frame_size); 
     
     // jumbo size & rrd retirement timer
     value = 
@@ -1034,12 +1034,12 @@ at_phy_config(unsigned long data)
     struct at_adapter *adapter = (struct at_adapter *) data;
     struct at_hw *hw = &adapter->hw; 
     
-    DEBUGFUNC("at_phy_reconfig!");
+    DEBUGFUNC("at_phy_reconfig!\n");
 
     at_write_phy_reg(hw, MII_ADVERTISE, hw->mii_autoneg_adv_reg);
     at_write_phy_reg(hw, MII_AT001_CR, hw->mii_1000t_ctrl_reg);
     
-    DEBUGOUT("4 register written");
+    DEBUGOUT("4 register written\n");
     at_write_phy_reg(hw, MII_BMCR, MII_CR_RESET|MII_CR_AUTO_NEG_EN|MII_CR_RESTART_AUTO_NEG);
 
 }

@@ -1,4 +1,4 @@
-/* AtherosL1Ethernet.h -- ATL1 driver implements
+/* AtherosL1Ethernet.cpp -- ATL1 driver implements
  *
  * Copyright(c) 2007 Atheros Corporation. All rights reserved.
  * Copyright(c) 2010 maolj <maolj@hotmail.com> All rights reserved.
@@ -215,7 +215,9 @@ void AtherosL1Ethernet::stop(IOService *provider)
 
 bool AtherosL1Ethernet::OSAddNetworkMedium(UInt32 type, UInt32 bps, UInt32 index)
 {
-    IONetworkMedium *medium;
+    DbgPrint("OSAddNetworkMedium()\n");
+	
+	IONetworkMedium *medium;
 
     medium = IONetworkMedium::medium( type, bps, 0, index );
     if (!medium)
@@ -251,7 +253,7 @@ void AtherosL1Ethernet::atIntr(OSObject *client, IOInterruptEventSource *src, in
     u32 status;
     int max_ints = 12;
     
-    DEBUGFUNC("at_intr() !");
+    DEBUGFUNC("at_intr() !\n");
     
     if (0 == (status = adapter->cmb.cmb->int_stats))
         return ;
@@ -271,7 +273,7 @@ loopint:
     
     // check if PCIE PHY Link down
     if (status&ISR_PHY_LINKDOWN) {
-        DEBUGOUT1("pcie phy linkdown %x", status);
+        DEBUGOUT1("pcie phy linkdown %x\n", status);
         AT_WRITE_REG(hw, REG_ISR, 0);
         AT_WRITE_REG(hw, REG_IMR, 0);
         AT_WRITE_FLUSH(hw);
@@ -282,7 +284,7 @@ loopint:
     // check if DMA read/write error ?
     if (status&(ISR_DMAR_TO_RST|ISR_DMAW_TO_RST)) 
     {
-        DEBUGOUT1("PCIE DMA RW error (status = 0x%x) !", status);
+        DEBUGOUT1("PCIE DMA RW error (status = 0x%x) !\n", status);
         //AT_WRITE_REG(&adapter->hw, REG_MASTER_CTRL, MASTER_CTRL_SOFT_RST);
         AT_WRITE_REG(hw, REG_ISR, 0);
         AT_WRITE_REG(hw, REG_IMR, 0);
@@ -382,15 +384,15 @@ void AtherosL1Ethernet::at_clean_rx_irq(at_adapter *adapter)
         chk_rrd:        
             // check rrd status
             if (rrd->num_buf != 1) {
-                DEBUGOUT1("RRD NumRfd %d", rrd->num_buf);
-                DEBUGOUT1("packet length = %d", rrd->xsz.xsum_sz.pkt_size);
+                DEBUGOUT1("RRD NumRfd %d\n", rrd->num_buf);
+                DEBUGOUT1("packet length = %d\n", rrd->xsz.xsum_sz.pkt_size);
             } else {
                 goto rrd_ok;
             }
             
             // rrd seems to be bad
             if (i-- > 0) { // rrd may not be DMAed completely
-                DEBUGOUT("RRD may not be DMAed completely");
+                DEBUGOUT("RRD may not be DMAed completely\n");
                 usec_delay(1);
                 goto chk_rrd;
             }
@@ -403,12 +405,12 @@ void AtherosL1Ethernet::at_clean_rx_irq(at_adapter *adapter)
                 num_buf = 
                 (rrd->xsz.xsum_sz.pkt_size+adapter->rx_buffer_len - 1)/
                 adapter->rx_buffer_len;
-                DEBUGOUT1("RRD.buf_index (%d)", rrd->buf_indx);
+                DEBUGOUT1("RRD.buf_index (%d)\n", rrd->buf_indx);
                 if (rrd->num_buf == num_buf) {
                     // clean alloc flag for bad rrd
                     while (rfd_ring->next_to_clean != 
                            (rrd->buf_indx + num_buf) ) {
-                        DEBUGOUT1("clear index (%d)", rfd_ring->next_to_clean);
+                        DEBUGOUT1("clear index (%d)\n", rfd_ring->next_to_clean);
                         rfd_ring->buffer_info[rfd_ring->next_to_clean].alloced = 0;
                         if (++rfd_ring->next_to_clean == rfd_ring->count) {
                             rfd_ring->next_to_clean = 0;
@@ -456,7 +458,7 @@ void AtherosL1Ethernet::at_clean_rx_irq(at_adapter *adapter)
                 /* packet error , don't need upstream */
                 buffer_info->alloced = 0;  
                 rrd->xsz.valid = 0;
-                DEBUGOUT1("rrd error flag %x", rrd->err_flg);
+                DEBUGOUT1("rrd error flag %x\n", rrd->err_flg);
                 continue;
             }
         }
@@ -639,7 +641,7 @@ const OSString *AtherosL1Ethernet::newVendorString() const
 
 const OSString *AtherosL1Ethernet::newModelString() const
 {
-    return OSString::withCString("L1e LAN");
+    return OSString::withCString("L1 LAN");
 }
 
 IOReturn AtherosL1Ethernet::selectMedium(const IONetworkMedium *medium)

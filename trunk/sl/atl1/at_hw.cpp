@@ -77,7 +77,7 @@ at_reset_hw(struct at_hw *hw)
     u16 pci_cfg_cmd_word;
     int i;
 	
-    DEBUGFUNC("at_reset_hw");
+    DEBUGFUNC("at_reset_hw()\n");
 	
     /* Workaround for PCI problem when BIOS sets MMRBC incorrectly. */
     at_read_pci_cfg(hw, PCI_REG_COMMAND, &pci_cfg_cmd_word);
@@ -182,7 +182,7 @@ at_read_mac_addr(struct at_hw * hw)
 {
     u16  i;
     
-    DEBUGFUNC("at_read_mac_addr");
+    DEBUGFUNC("at_read_mac_addr()\n");
     
     if (get_permanent_address(hw)) {
         // for test
@@ -292,7 +292,7 @@ at_init_hw(struct at_hw *hw)
 {
     u32 ret_val = 0;
     
-    DEBUGFUNC("at_init_hw");
+    DEBUGFUNC("at_init_hw()\n");
     
     at_init_pcie(hw);
     
@@ -308,7 +308,7 @@ at_init_hw(struct at_hw *hw)
     
     ret_val = at_phy_init(hw);
     
-    DEBUGOUT1("at_init_hw: ret: %d", ret_val);
+    DEBUGOUT1("at_init_hw: ret: %d()\n", ret_val);
     
     return ret_val;
 }   
@@ -330,7 +330,7 @@ at_get_speed_and_duplex(
     s32 ret_val;
     u16 phy_data;
 	
-    DEBUGFUNC("at_get_speed_and_duplex");
+    DEBUGFUNC("at_get_speed_and_duplex()\n");
 	
     // ; --- Read   PHY Specific Status Register (17)
     ret_val = at_read_phy_reg(hw, MII_AT001_PSSR, &phy_data);
@@ -343,7 +343,7 @@ at_get_speed_and_duplex(
     switch(phy_data&MII_AT001_PSSR_SPEED) {
 		case MII_AT001_PSSR_1000MBS:
 			*speed = SPEED_1000;
-			DEBUGOUT("1000 Mbps");
+			DEBUGOUT("1000 Mbps()");
 			break;
 		case MII_AT001_PSSR_100MBS:
 			*speed = SPEED_100;
@@ -361,10 +361,10 @@ at_get_speed_and_duplex(
     
     if (phy_data & MII_AT001_PSSR_DPLX) {
         *duplex = FULL_DUPLEX;
-        DEBUGOUT("Full Duplex");
+        DEBUGOUT("Full Duplex\n");
     } else {
         *duplex = HALF_DUPLEX;
-        DEBUGOUT(" Half Duplex");
+        DEBUGOUT(" Half Duplex\n");
     }
 	
     return AT_SUCCESS;
@@ -384,7 +384,7 @@ at_read_phy_reg(
     u32 val;
     int i;
     
-    DEBUGFUNC("at_read_phy_reg");
+    DEBUGFUNC("at_read_phy_reg()\n");
 	
     val = ((u32)(reg_addr&MDIO_REG_ADDR_MASK)) 
 	<< MDIO_REG_ADDR_SHIFT |
@@ -467,7 +467,7 @@ at_phy_setup_autoneg_adv(struct at_hw *hw)
     u16 mii_autoneg_adv_reg;
     u16 mii_1000t_ctrl_reg;
 	
-    DEBUGFUNC("at_phy_setup_autoneg_adv");
+    DEBUGFUNC("at_phy_setup_autoneg_adv()\n");
     
     /* Read the MII Auto-Neg Advertisement Register (Address 4/9). */
     mii_autoneg_adv_reg = MII_AR_DEFAULT_CAP_MASK;
@@ -579,15 +579,15 @@ at_phy_init(struct at_hw* hw)
     /* setup AutoNeg parameters */
     ret_val = at_phy_setup_autoneg_adv(hw);
     if(ret_val) {
-        DEBUGOUT("Error Setting up Auto-Negotiation");
+        DEBUGOUT("Error Setting up Auto-Negotiation\n");
         return ret_val;
     }
     
     /* SW.Reset & En-Auto-Neg to restart Auto-Neg*/
-    DEBUGOUT("Restarting Auto-Neg");
+    DEBUGOUT("Restarting Auto-Neg\n");
     ret_val = at_phy_commit(hw);
     if (ret_val) {
-        DEBUGOUT("Error Resetting the phy");
+        DEBUGOUT("Error Resetting the phy\n");
         return ret_val;
     }
     
@@ -624,7 +624,7 @@ at_phy_commit(struct at_hw *hw)
     s32 ret_val;
     u16 phy_data;
     
-    DEBUGFUNC("at_phy_commit");
+    DEBUGFUNC("at_phy_commit()\n");
 	
 	/*
 	 if (hw->MediaType == MEDIA_TYPE_AUTO_SENSOR) {
@@ -656,7 +656,7 @@ at_phy_commit(struct at_hw *hw)
         /**************************************
 		 * pcie serdes link may be down !
 		 **************************************/
-        DEBUGOUT("Auto-Neg make pcie phy link down !");
+        DEBUGOUT("Auto-Neg make pcie phy link down !\n");
 		
         for (i=0; i < 25; i++) {
             msec_delay(1);
@@ -670,7 +670,7 @@ at_phy_commit(struct at_hw *hw)
             AT_ERR("pcie linkdown at least for 25ms !\n");
             return ret_val;
 			
-			DEBUGOUT1("pcie linkup after %dms", i);
+			DEBUGOUT1("pcie linkup after %dms\n", i);
         }
     }
     return AT_SUCCESS;

@@ -20,7 +20,7 @@
 #define MII_EXPANSION       0x06        /* Expansion register          */
 #define MII_CTRL1000        0x09        /* 1000BASE-T control          */
 #define MII_STAT1000        0x0a        /* 1000BASE-T status           */
-#define MII_ESTATUS	    0x0f	/* Extended Status */
+#define MII_ESTATUS	        0x0f	    /* Extended Status */
 #define MII_DCOUNTER        0x12        /* Disconnect counter          */
 #define MII_FCSCOUNTER      0x13        /* False carrier counter       */
 #define MII_NWAYTEST        0x14        /* N-way auto-neg test reg     */
