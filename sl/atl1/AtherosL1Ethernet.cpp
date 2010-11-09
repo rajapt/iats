@@ -784,8 +784,9 @@ UInt32 AtherosL1Ethernet::outputPacket(mbuf_t m, void *prm)
     struct at_tpd_ring* tpd_ring = &adapter->tpd_ring;
     pTpd = AT_TPD_DESC(tpd_ring,
                        ((u16)atomic_read(&tpd_ring->next_to_use)));
-    memset(pTpd, 0, sizeof(TpdDescr));
-    
+    //memset(pTpd, 0, sizeof(TpdDescr));
+    memset(((u8*)pTpd + sizeof(pTpd->addr)), 0, (sizeof(TpdDescr) - sizeof(pTpd->addr))); //addr don't clear
+
     next_to_use = (u16)atomic_read(&tpd_ring->next_to_use);
     buffer_info = tpd_ring->buffer_info+next_to_use; 
     
